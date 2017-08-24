@@ -8,11 +8,13 @@ date_default_timezone_set('Europe/Moscow');
 
 class vkPoster {
 
-    const exampleTime = '2017 13/10 15:00';
+    const LINK = 'https://api.vk.com/method/';
+    const VERSION = 5.68;
+
+    const EXAMPLE_TIME = '2017 13/10 15:00';
 
     private $unixTimes = [];
     private $texts = [];
-    private $pictures = [];
 
     private $group_id;
     private $tokens;
@@ -20,18 +22,17 @@ class vkPoster {
     public function __construct(array $tokens, $group_id, array $posts) {
 
         $pieces = function ($part) use ($posts) {
-            return array_map(function ($post) use ($part) {
+            return array_values(array_map(function ($post) use ($part) {
                 return $post[$part];
-            }, $posts);
+            }, $posts));
         };
 
         $this->texts = $pieces(0);
-        $this->pictures = $pieces(1);
 
         $this->tokens = $tokens;
         $this->group_id = $group_id;
 
-        $this->convertUnixTime($pieces(2));
+        $this->convertUnixTime($pieces(1));
     }
 
     private function convertUnixTime (array $times) {
@@ -49,7 +50,7 @@ class vkPoster {
             if ($unix === false) {
                 throw new vkPosterException(
                     'Not valid format: '. $time. PHP_EOL.
-                    'Example: ' . self::exampleTime
+                    'Example: ' . self::EXAMPLE_TIME
                 );
             }
             $this->unixTimes[] = $unix->getTimestamp();
@@ -59,17 +60,34 @@ class vkPoster {
     public function getUnixTimes () {
         return $this->unixTimes;
     }
-}
 
+    public function sending() {
+        for ($i = 0; $i < count($this->texts); $i++) {
+            $this->sendPost($this->texts[$i], $this->unixTimes[$i]);
+        }
+    }
 
-try {
-    $posts = [
-        ['Текст какой-нибудь', 'img.jpg', '2017 13/10 15:00'],
-        ['Текст ещё какой-нибудь', 'img2.jpg', '2017 13/10 16:00']
-    ];
+    private function sendPost ($text, $time) {
+        $params = [
+            'owner_id' => '-'.$this->group_id,
+            'from_group' => 1,
+            'message' => $text,
+            'publish_date' => $time,
+        ];
 
-    $poster = new vkPoster($posts);
-    echo json_encode($poster->getUnixTimes());
-} catch (vkPosterException $e) {
-    echo $e->getMessage();
+        $this->sendParams('wall.post', $params);
+    }
+
+    private function sendParams ($method, $params) {
+        $params['v'] = self::VERSION;
+        $params['access_token'] = $this->getRandToken();
+
+        $URL = self::LINK.$method.'?'.http_build_query($params);
+
+        return json_decode(file_get_contents($URL));
+    }
+
+    private function getRandToken () {
+        return $this->tokens[array_rand($this->tokens)];
+    }
 }
