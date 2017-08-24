@@ -63,15 +63,16 @@ class vkPoster {
 
     public function sending() {
         for ($i = 0; $i < count($this->texts); $i++) {
-            $this->sendPost($this->texts[$i], $this->unixTimes[$i]);
+            $this->sendPost($this->texts[$i], [], $this->unixTimes[$i]);
         }
     }
 
-    private function sendPost ($text, $time) {
+    private function sendPost ($text, array $attachments, $time) {
         $params = [
             'owner_id' => '-'.$this->group_id,
             'from_group' => 1,
             'message' => $text,
+            'attachments' => implode(',', $attachments),
             'publish_date' => $time,
         ];
 
