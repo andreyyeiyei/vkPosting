@@ -14,7 +14,10 @@ class vkPoster {
     private $texts = [];
     private $pictures = [];
 
-    public function __construct(array $posts) {
+    private $group_id;
+    private $tokens;
+
+    public function __construct(array $tokens, $group_id, array $posts) {
 
         $pieces = function ($part) use ($posts) {
             return array_map(function ($post) use ($part) {
@@ -24,6 +27,9 @@ class vkPoster {
 
         $this->texts = $pieces(0);
         $this->pictures = $pieces(1);
+
+        $this->tokens = $tokens;
+        $this->group_id = $group_id;
 
         $this->convertUnixTime($pieces(2));
     }
