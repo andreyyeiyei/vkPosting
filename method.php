@@ -2,7 +2,7 @@
 
 $token = 'token';
 $text = 'Тест';
-$groups = '676';
+$groups = '-676';
 
 $config = array(
   'owner_id' => $groups,
