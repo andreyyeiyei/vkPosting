@@ -16,7 +16,7 @@ var_dump(send_request_params ('wall.post', $config));
 //////////ФУНКЦИИ//////////
 
 function send_request_params ($method, $params) {
-    globals $token;
+    global $token;
 
     $params['v'] = '5.63';
     $params['access_token'] = $token;
