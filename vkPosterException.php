@@ -2,8 +2,7 @@
 
 namespace classes;
 
-
-class vkPosterException extends \Exception
+class VKPosterException extends \Exception
 {
 
 }

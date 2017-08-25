@@ -2,22 +2,23 @@
 
 namespace classes;
 
-require_once 'vkPosterException.php';
+require_once 'autoload.php';
 
 date_default_timezone_set('Europe/Moscow');
 
-class vkPoster {
+class VKPoster {
 
-    const LINK = 'https://api.vk.com/method/';
-    const VERSION = 5.68;
+    use sendParams;
 
     const EXAMPLE_TIME = '2017 13/10 15:00';
 
     private $unixTimes = [];
+
     private $texts = [];
+    private $attachments = [];
 
     private $group_id;
-    private $tokens;
+    protected $tokens;
 
     public function __construct(array $tokens, $group_id, array $posts) {
 
@@ -27,12 +28,24 @@ class vkPoster {
             }, $posts));
         };
 
-        $this->texts = $pieces(0);
+        $this->texts = $pieces(1);
+        foreach ($this->texts as $text) {
+            if (!is_string($text) && !is_null($text)) {
+                throw new vkPosterException(json_encode($text) . ' - no string');
+            }
+        }
+
+        $this->attachments = $pieces(2);
+        foreach ($this->attachments as $attachment) {
+            if (!is_array($attachment)) {
+                throw new vkPosterException(json_encode($attachment) . ' - no array');
+            }
+        }
 
         $this->tokens = $tokens;
         $this->group_id = $group_id;
 
-        $this->convertUnixTime($pieces(1));
+        $this->convertUnixTime($pieces(0));
     }
 
     private function convertUnixTime (array $times) {
@@ -46,6 +59,12 @@ class vkPoster {
         unset($this->unixTimes);
 
         foreach ($times as $time) {
+
+            if ($time === null) {
+                $this->unixTimes[] = null;
+                continue;
+            }
+
             $unix = \DateTime::createFromFormat("Y d/m G:i", $time);
             if ($unix === false) {
                 throw new vkPosterException(
@@ -63,11 +82,15 @@ class vkPoster {
 
     public function sending() {
         for ($i = 0; $i < count($this->texts); $i++) {
-            $this->sendPost($this->texts[$i], [], $this->unixTimes[$i]);
+            $this->API_sendPost(
+                $this->texts[$i],
+                $this->attachments[$i],
+                $this->unixTimes[$i]
+            );
         }
     }
 
-    private function sendPost ($text, array $attachments, $time) {
+    private function API_sendPost ($text, array $attachments, $time) {
         $params = [
             'owner_id' => '-'.$this->group_id,
             'from_group' => 1,
@@ -76,19 +99,6 @@ class vkPoster {
             'publish_date' => $time,
         ];
 
-        $this->sendParams('wall.post', $params);
-    }
-
-    private function sendParams ($method, $params) {
-        $params['v'] = self::VERSION;
-        $params['access_token'] = $this->getRandToken();
-
-        $URL = self::LINK.$method.'?'.http_build_query($params);
-
-        return json_decode(file_get_contents($URL));
-    }
-
-    private function getRandToken () {
-        return $this->tokens[array_rand($this->tokens)];
+        $this->API_sendParams('wall.post', $params);
     }
 }
