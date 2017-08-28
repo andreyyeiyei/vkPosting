@@ -1,8 +1,8 @@
 <?php
 
-namespace classes;
+namespace vk;
 
-require_once 'autoload.php';
+require_once 'loadPoster.php';
 
 date_default_timezone_set('Europe/Moscow');
 
@@ -10,7 +10,7 @@ class VKPoster {
 
     use sendParams;
 
-    const EXAMPLE_TIME = '2017 13/10 15:00';
+    const EXAMPLE_TIME = '2017 15/10 15:00';
 
     private $unixTimes = [];
 

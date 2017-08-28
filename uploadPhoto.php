@@ -1,8 +1,8 @@
 <?php
 
-namespace classes;
+namespace vk;
 
-require_once 'autoload.php';
+require_once 'loadPoster.php';
 
 class UploadPhoto
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace classes;
+namespace vk;
 
 class VKPosterException extends \Exception
 {
