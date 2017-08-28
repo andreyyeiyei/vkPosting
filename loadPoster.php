@@ -1,6 +1,6 @@
 <?php
 
-require_once 'vkPosterException.php';
-require_once 'sendParams.php';
-require_once 'uploadPhoto.php';
-require_once 'vkPoster.php';
+require_once __DIR__.'/vkPosterException.php';
+require_once __DIR__.'/sendParams.php';
+require_once __DIR__.'/uploadPhoto.php';
+require_once __DIR__.'/vkPoster.php';
